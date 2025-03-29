@@ -67,7 +67,20 @@ pipeline{
         }
         stage('Deploy to container'){
             steps{
-                sh 'docker run -d --name swiggy -p 3000:3000 tirucloud/swiggy:latest'
+
+            script {
+                    // Stop and remove the container if it already exists
+                    sh '''
+                    CONTAINER_ID=$(docker ps -aqf "name=swiggy")
+                    if [ ! -z "$CONTAINER_ID" ]; then
+                        echo "Stopping existing container..."
+                        docker stop $CONTAINER_ID
+                        docker rm $CONTAINER_ID
+                    fi
+                    echo "Starting new container..."
+                    docker run -d --name swiggy -p 3000:3000 tirucloud/swiggy:latest
+                    '''
+                }
             }
         }
     }
